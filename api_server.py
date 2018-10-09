@@ -24,4 +24,4 @@ api.add_resource(Register, '/register-request')
 api.add_resource(Data, '/request-data/<int:todo_id>')
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', debug=True)

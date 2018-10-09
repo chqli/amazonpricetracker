@@ -2,18 +2,18 @@ import asyncio
 import csv
 import json
 import logging
-import os
 from io import StringIO
 
 import aiohttp
 import zmq
-from dataclasses import dataclass
 
 
-@dataclass
 class Record:
-    ts: int
-    amount: float
+
+    def __init__(self, ts, amount) -> None:
+        super().__init__()
+        self.ts = ts
+        self.amount = amount
 
 
 def parse_record_csv(record):
@@ -55,21 +55,16 @@ def get_next_average():
     socket.send_string('asdf')
     msg = socket.recv_pyobj()
     records = [parse_record_csv(x) for x in msg]
+    print("For timestamps {} to {}".format(records[0].ts, records[-1].ts))
     return get_price_average(records)
 
 
 context = zmq.Context()
 socket = context.socket(zmq.REQ)
 scheduler_socket = context.socket(zmq.SUB)
-if os.name == 'nt':
-    socket.connect("tcp://127.0.0.1:6000")
-else:
-    socket.connect("ipc:///tmp/datamanager")
+socket.connect("tcp://127.0.0.1:6000")
 
-if os.name == 'nt':
-    scheduler_socket.connect("tcp://127.0.0.1:7000")
-else:
-    scheduler_socket.connect("ipc:///tmp/scheduler")
+scheduler_socket.connect("tcp://127.0.0.1:7000")
 scheduler_socket.setsockopt_string(zmq.SUBSCRIBE, '')
 loop = asyncio.get_event_loop()
 
@@ -88,7 +83,7 @@ async def try_these():
         next_avg = loop.run_in_executor(None, get_next_average)
         flag_task = loop.create_task(do_post_poll())
         gather = await asyncio.gather(flag_task, next_avg)
-        print(next_price(gather[1], gather[0]))
+        print("Price to be set is {}".format(round(next_price(gather[1], gather[0]), 2)))
 
 
 try:

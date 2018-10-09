@@ -1,6 +1,3 @@
-import time
-
-
 class BatchReadLines:
     def __init__(self, file_source, batch_size) -> None:
         self.BUFFER_SIZE = 100
