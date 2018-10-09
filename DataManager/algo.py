@@ -60,10 +60,17 @@ def get_next_average():
 
 context = zmq.Context()
 socket = context.socket(zmq.REQ)
+scheduler_socket = context.socket(zmq.SUB)
 if os.name == 'nt':
     socket.connect("tcp://127.0.0.1:6000")
 else:
     socket.connect("ipc:///tmp/datamanager")
+
+if os.name == 'nt':
+    scheduler_socket.connect("tcp://127.0.0.1:7000")
+else:
+    scheduler_socket.connect("ipc:///tmp/scheduler")
+scheduler_socket.setsockopt_string(zmq.SUBSCRIBE, '')
 loop = asyncio.get_event_loop()
 
 logging.basicConfig(level=logging.DEBUG)
@@ -77,6 +84,7 @@ def next_price(avg_price, was_sold):
 
 async def try_these():
     while True:
+        string = scheduler_socket.recv_string()
         next_avg = loop.run_in_executor(None, get_next_average)
         flag_task = loop.create_task(do_post_poll())
         gather = await asyncio.gather(flag_task, next_avg)

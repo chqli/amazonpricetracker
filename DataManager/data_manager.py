@@ -26,11 +26,3 @@ class BatchReadLines:
                 if len(lines) is 0:
                     break
                 yield from lines
-
-
-def read_every_tick(seconds, manager):
-    while True:
-        time.sleep(seconds)
-        gen = manager.get_batch()
-        print(next(gen))
-        print("one tick")
