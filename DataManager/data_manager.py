@@ -1,14 +1,4 @@
 import time
-import csv
-from io import StringIO
-
-from dataclasses import dataclass
-
-
-@dataclass
-class Record:
-    ts: int
-    amount: float
 
 
 class BatchReadLines:
@@ -28,13 +18,6 @@ class BatchReadLines:
             bsize = self.batch_size
         lst = [x for _, x in zip(range(bsize), self.file_gen)]
         yield lst
-
-    @staticmethod
-    def parse_record_csv(record):
-        f = StringIO(record)
-        reader = csv.reader(f, delimiter=',')
-        for row in reader:
-            return Record(row[0], row[1])
 
     def read_to_buffer(self):
         with open(self.file_source) as fh:
