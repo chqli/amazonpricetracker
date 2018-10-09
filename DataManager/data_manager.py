@@ -51,7 +51,3 @@ def read_every_tick(seconds, manager):
         gen = manager.get_batch()
         print(next(gen))
         print("one tick")
-
-# datacsv = "C:\\Users\\pranami\\Downloads\\data.csv"
-# manager = BatchReadLines(datacsv, 5)
-# read_every_tick(2, manager)

@@ -1,11 +1,15 @@
+import os
+
 import zmq
 
 from DataManager.data_manager import BatchReadLines
 
 context = zmq.Context()
 socket = context.socket(zmq.REP)
-# rc = socket.bind("ipc:///tmp/datamanager")
-rc = socket.bind("tcp://127.0.0.1:5000")
+if os.name == 'nt':
+    socket.bind("tcp://127.0.0.1:5000")
+else:
+    socket.bind("ipc:///tmp/datamanager")
 datacsv = "C:\\Users\\pranami\\Downloads\\data.csv"
 manager = BatchReadLines(datacsv, 5)
 while True:
