@@ -13,15 +13,15 @@ class Register(Resource):
         return {'id': uuid.uuid4().int >> 64}
 
 
-class Data(Resource):
-    def get(self, todo_id):
-        if int(todo_id) % 2 == 0:
+class Sold(Resource):
+    def get(self, register_id):
+        if int(register_id) % 2 == 0:
             return {'sold': True}
         return {'sold': False}
 
 
 api.add_resource(Register, '/register-request')
-api.add_resource(Data, '/request-data/<int:todo_id>')
+api.add_resource(Sold, '/request-data/<int:register_id>')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)

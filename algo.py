@@ -1,7 +1,7 @@
 import asyncio
 import csv
 import json
-import logging
+import time
 from io import StringIO
 
 import aiohttp
@@ -30,12 +30,13 @@ def get_price_average(records):
     return total / len(records)
 
 
-async def do_post_poll():
-    _id = await post_request_to_api_server()
-    return await poll_request_to_api_server(_id)
+async def get_sold_status():
+    _id = await post_register_request()
+    time.sleep(3)
+    return await poll_request_data(_id)
 
 
-async def post_request_to_api_server():
+async def post_register_request():
     async with aiohttp.ClientSession() as session:
         async with session.post("http://localhost:5000/register-request", timeout=3) as resp:
             read = await resp.read()
@@ -43,15 +44,15 @@ async def post_request_to_api_server():
             return json_data['id']
 
 
-async def poll_request_to_api_server(id):
+async def poll_request_data(_id):
     async with aiohttp.ClientSession() as session:
-        async with session.get("http://localhost:5000/request-data/{}".format(id), timeout=3) as resp:
+        async with session.get("http://localhost:5000/request-data/{}".format(_id), timeout=3) as resp:
             read = await resp.read()
             json_data = json.loads(read)
             return json_data['sold']
 
 
-def get_next_average():
+def get_recent_average():
     socket.send_string('asdf')
     msg = socket.recv_pyobj()
     records = [parse_record_csv(x) for x in msg]
@@ -68,8 +69,6 @@ scheduler_socket.connect("tcp://127.0.0.1:7000")
 scheduler_socket.setsockopt_string(zmq.SUBSCRIBE, '')
 loop = asyncio.get_event_loop()
 
-logging.basicConfig(level=logging.DEBUG)
-
 
 def next_price(avg_price, was_sold):
     if was_sold:
@@ -77,16 +76,16 @@ def next_price(avg_price, was_sold):
     return avg_price * 0.9
 
 
-async def try_these():
+async def run():
     while True:
-        string = scheduler_socket.recv_string()
-        next_avg = loop.run_in_executor(None, get_next_average)
-        flag_task = loop.create_task(do_post_poll())
-        gather = await asyncio.gather(flag_task, next_avg)
-        print("Price to be set is {}".format(round(next_price(gather[1], gather[0]), 2)))
+        scheduler_socket.recv_string()
+        next_avg = loop.run_in_executor(None, get_recent_average)
+        was_sold_task = loop.create_task(get_sold_status())
+        tasks = await asyncio.gather(was_sold_task, next_avg)
+        print("Price to be set is {}".format(round(next_price(tasks[1], tasks[0]), 2)))
 
 
 try:
-    loop.run_until_complete(asyncio.gather(try_these()))
+    loop.run_until_complete(asyncio.gather(run()))
 finally:
     loop.close()

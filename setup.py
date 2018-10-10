@@ -1,10 +1,8 @@
 from distutils.core import setup
 
-setup(name='Distutils',
+setup(name='amazonpricetracker',
       version='1.0',
-      description='Python Distribution Utilities',
-      author='Greg Ward',
-      author_email='gward@python.net',
-      url='https://www.python.org/sigs/distutils-sig/',
-      packages=['distutils', 'distutils.command'],
+      description='Based on recent sales and recent average costs, provides an algorithm to suggest new cost',
+      author='Nirav Pranami',
+      packages=['distutils', 'distutils.command'], requires=['aiohttp', 'pyzmq', 'flask', 'flask-restful']
       )
