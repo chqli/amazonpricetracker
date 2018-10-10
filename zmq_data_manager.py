@@ -9,6 +9,5 @@ datacsv = "data.csv"
 manager = BatchReadLines(datacsv, 5)
 while True:
     msg = socket.recv()
-    batch = manager.get_batch()
-    elem = next(batch)
-    socket.send_pyobj(elem)
+    batch = next(manager.get_batch())
+    socket.send_pyobj(batch)
