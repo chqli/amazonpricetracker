@@ -38,7 +38,7 @@ async def get_sold_status():
 
 async def post_register_request():
     async with aiohttp.ClientSession() as session:
-        async with session.post("http://localhost:5000/register-request", timeout=3) as resp:
+        async with session.post("http://localhost:5000/register-request", timeout=15) as resp:
             read = await resp.read()
             json_data = json.loads(read)
             return json_data['id']
@@ -46,7 +46,7 @@ async def post_register_request():
 
 async def poll_request_data(_id):
     async with aiohttp.ClientSession() as session:
-        async with session.get("http://localhost:5000/request-data/{}".format(_id), timeout=3) as resp:
+        async with session.get("http://localhost:5000/request-data/{}".format(_id), timeout=15) as resp:
             read = await resp.read()
             json_data = json.loads(read)
             return json_data['sold']
